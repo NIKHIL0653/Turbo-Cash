@@ -180,14 +180,14 @@ export default function Analytics() {
         notifications={notifications}
         onClose={removeNotification}
       />
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Expense Analytics
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-gray-600">
               {hasTransactions
                 ? "Deep insights into your spending patterns and financial behavior."
                 : "Add transactions to see detailed analytics and spending insights."}
@@ -225,156 +225,158 @@ export default function Analytics() {
           {hasTransactions && (
             <>
               {/* Controls */}
-              <div className="mb-8">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-4 h-4 text-teal-500" />
-                          <Label htmlFor="time-filter">Time Period:</Label>
-                          <Select
-                            value={timeFilter}
-                            onValueChange={setTimeFilter}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="weekly">Weekly</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="yearly">Yearly</SelectItem>
-                            </SelectContent>
-                          </Select>
+              <div className="mb-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-teal-100 rounded-full p-2">
+                          <Filter className="w-4 h-4 text-teal-600" />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="category-filter">Category:</Label>
-                          <Select
-                            value={categoryFilter}
-                            onValueChange={handleFilterChange}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all">All</SelectItem>
-                              {userData.categories.map((category) => (
-                                <SelectItem
-                                  key={category}
-                                  value={category.toLowerCase()}
-                                >
-                                  {category}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <Label htmlFor="time-filter" className="text-gray-700 font-medium">Time Period:</Label>
+                        <Select
+                          value={timeFilter}
+                          onValueChange={setTimeFilter}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="yearly">Yearly</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <Button
-                        onClick={() => setShowAddTransaction(true)}
-                        className="bg-teal-500 hover:bg-teal-600 text-white"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Transaction
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <Label htmlFor="category-filter" className="text-gray-700 font-medium">Category:</Label>
+                        <Select
+                          value={categoryFilter}
+                          onValueChange={handleFilterChange}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All</SelectItem>
+                            {userData.categories.map((category) => (
+                              <SelectItem
+                                key={category}
+                                value={category.toLowerCase()}
+                              >
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    <Button
+                      onClick={() => setShowAddTransaction(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Transaction
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Total Expenses
-                        </p>
-                        <p className="text-2xl font-bold text-red-600">
-                          {formatAmount(analyticsData.totalExpenses)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          All time
-                        </p>
-                      </div>
-                      <TrendingUp className="w-8 h-8 text-red-500" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        Total Expenses
+                      </p>
+                      <p className="text-xl font-bold text-gray-900 mb-1">
+                        {formatAmount(analyticsData.totalExpenses)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        All time
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="bg-gray-100 rounded-full p-2">
+                      <TrendingUp className="w-4 h-4 text-gray-600" />
+                    </div>
+                  </div>
+                </div>
 
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Total Income
-                        </p>
-                        <p className="text-2xl font-bold text-green-600">
-                          {formatAmount(analyticsData.totalIncome)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          All time
-                        </p>
-                      </div>
-                      <DollarSign className="w-8 h-8 text-green-500" />
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        Total Income
+                      </p>
+                      <p className="text-xl font-bold text-gray-900 mb-1">
+                        {formatAmount(analyticsData.totalIncome)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        All time
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="bg-gray-100 rounded-full p-2">
+                      <DollarSign className="w-4 h-4 text-gray-600" />
+                    </div>
+                  </div>
+                </div>
 
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Net Savings
-                        </p>
-                        <p
-                          className={`text-2xl font-bold ${analyticsData.netSavings >= 0 ? "text-teal-600" : "text-red-600"}`}
-                        >
-                          {formatAmount(analyticsData.netSavings)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          All time
-                        </p>
-                      </div>
-                      <TrendingUp className="w-8 h-8 text-teal-500" />
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        Net Savings
+                      </p>
+                      <p
+                        className={`text-xl font-bold mb-1 ${analyticsData.netSavings >= 0 ? "text-gray-900" : "text-gray-900"}`}
+                      >
+                        {formatAmount(analyticsData.netSavings)}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        All time
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="bg-gray-100 rounded-full p-2">
+                      <TrendingUp className="w-4 h-4 text-gray-600" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Transactions Table */}
-              <Card className="border-0 shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-teal-500" />
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
+                <div className="bg-gray-50 rounded-t-lg p-4 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+                    <div className="bg-teal-100 rounded-full p-2">
+                      <Eye className="w-5 h-5 text-teal-600" />
+                    </div>
                     Recent Transactions ({sortedTransactions.length})
                     {categoryFilter !== "all" && (
-                      <span className="text-sm font-normal text-muted-foreground">
+                      <span className="text-sm font-normal text-gray-600">
                         (Filtered by {categoryFilter})
                       </span>
                     )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </h3>
+                </div>
+                <div className="p-4">
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 text-sm font-semibold text-foreground">
+                          <th className="text-left py-4 text-sm font-semibold text-gray-900">
                             Date
                           </th>
-                          <th className="text-left py-3 text-sm font-semibold text-foreground">
+                          <th className="text-left py-4 text-sm font-semibold text-gray-900">
                             Description
                           </th>
-                          <th className="text-left py-3 text-sm font-semibold text-foreground">
+                          <th className="text-left py-4 text-sm font-semibold text-gray-900">
                             Category
                           </th>
-                          <th className="text-right py-3 text-sm font-semibold text-foreground">
+                          <th className="text-right py-4 text-sm font-semibold text-gray-900">
                             Amount
                           </th>
-                          <th className="text-center py-3 text-sm font-semibold text-foreground">
+                          <th className="text-center py-4 text-sm font-semibold text-gray-900">
                             Actions
                           </th>
                         </tr>
@@ -383,22 +385,22 @@ export default function Analytics() {
                         {paginatedTransactions.map((transaction, index) => (
                           <tr
                             key={`${transaction.id}_${index}`}
-                            className="border-b border-gray-100"
+                            className="border-b border-gray-100 hover:bg-gray-50 transition-all duration-200"
                           >
-                            <td className="py-3 text-sm text-muted-foreground">
+                            <td className="py-4 text-sm text-gray-600">
                               {transaction.date}
                             </td>
-                            <td className="py-3 text-sm text-foreground">
+                            <td className="py-4 text-sm text-gray-900 font-medium">
                               {transaction.description}
                             </td>
-                            <td className="py-3">
+                            <td className="py-4">
                               {(() => {
                                 const colors = getCategoryColor(
                                   transaction.category,
                                 );
                                 return (
                                   <span
-                                    className={`inline-block px-2 py-1 ${colors.bg} ${colors.text} text-xs rounded-full`}
+                                    className={`inline-block px-3 py-1 ${colors.bg} ${colors.text} text-xs rounded-full font-medium`}
                                   >
                                     {transaction.category}
                                   </span>
@@ -406,7 +408,7 @@ export default function Analytics() {
                               })()}
                             </td>
                             <td
-                              className={`py-3 text-sm font-medium text-right ${
+                              className={`py-4 text-sm font-semibold text-right ${
                                 transaction.type === "income"
                                   ? "text-green-600"
                                   : "text-red-600"
@@ -415,27 +417,27 @@ export default function Analytics() {
                               {transaction.type === "income" ? "+" : "-"}
                               {formatAmount(transaction.amount)}
                             </td>
-                            <td className="py-3">
+                            <td className="py-4">
                               <div className="flex justify-center gap-2">
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="p-1"
+                                  className="p-2 hover:bg-gray-100 transition-all duration-200"
                                   onClick={() =>
                                     handleEditTransaction(transaction)
                                   }
                                 >
-                                  <Edit className="w-4 h-4 text-muted-foreground" />
+                                  <Edit className="w-4 h-4 text-gray-500 hover:text-gray-700" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="p-1"
+                                  className="p-2 hover:bg-red-50 transition-all duration-200"
                                   onClick={() =>
                                     handleDeleteTransaction(transaction.id)
                                   }
                                 >
-                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                  <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
                                 </Button>
                               </div>
                             </td>
@@ -447,8 +449,8 @@ export default function Analytics() {
 
                   {/* Pagination Controls */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-6 px-4">
-                      <div className="text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between mt-6 px-6 pb-6">
+                      <div className="text-sm text-gray-600">
                         Showing {startIndex + 1} to{" "}
                         {Math.min(endIndex, sortedTransactions.length)} of{" "}
                         {sortedTransactions.length} transactions
@@ -461,12 +463,12 @@ export default function Analytics() {
                             setCurrentPage((prev) => Math.max(prev - 1, 1))
                           }
                           disabled={currentPage === 1}
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 hover:bg-gray-50 transition-all duration-200"
                         >
                           <ChevronLeft className="w-4 h-4" />
                           Previous
                         </Button>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-gray-600 px-3">
                           Page {currentPage} of {totalPages}
                         </span>
                         <Button
@@ -478,7 +480,7 @@ export default function Analytics() {
                             )
                           }
                           disabled={currentPage === totalPages}
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-1 hover:bg-gray-50 transition-all duration-200"
                         >
                           Next
                           <ChevronRight className="w-4 h-4" />
@@ -486,8 +488,8 @@ export default function Analytics() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </>
           )}
 

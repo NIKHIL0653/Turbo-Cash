@@ -141,109 +141,109 @@ export default function Goals() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Financial Goals
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600">
             Set, track, and achieve your financial milestones with visual
             progress tracking.
           </p>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Total Goals
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {userData.goals.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {activeGoals.length} active
-                  </p>
-                </div>
-                <Target className="w-8 h-8 text-teal-500" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-medium mb-1">
+                  Total Goals
+                </p>
+                <p className="text-xl font-bold text-gray-900 mb-1">
+                  {userData.goals.length}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {activeGoals.length} active
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-gray-100 rounded-full p-2">
+                <Target className="w-4 h-4 text-gray-600" />
+              </div>
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Target Amount
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {formatAmount(totalTargetAmount)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    All goals combined
-                  </p>
-                </div>
-                <DollarSign className="w-8 h-8 text-blue-500" />
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-medium mb-1">
+                  Target Amount
+                </p>
+                <p className="text-xl font-bold text-gray-900 mb-1">
+                  {formatAmount(totalTargetAmount)}
+                </p>
+                <p className="text-xs text-gray-500">
+                  All goals combined
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-gray-100 rounded-full p-2">
+                <DollarSign className="w-4 h-4 text-gray-600" />
+              </div>
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Saved So Far
-                  </p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatAmount(totalCurrentAmount)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {totalTargetAmount > 0
-                      ? (
-                          (totalCurrentAmount / totalTargetAmount) *
-                          100
-                        ).toFixed(1)
-                      : 0}
-                    % complete
-                  </p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-green-500" />
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-medium mb-1">
+                  Saved So Far
+                </p>
+                <p className="text-xl font-bold text-gray-900 mb-1">
+                  {formatAmount(totalCurrentAmount)}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {totalTargetAmount > 0
+                    ? (
+                        (totalCurrentAmount / totalTargetAmount) *
+                        100
+                      ).toFixed(1)
+                    : 0}
+                  % complete
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-gray-100 rounded-full p-2">
+                <TrendingUp className="w-4 h-4 text-gray-600" />
+              </div>
+            </div>
+          </div>
 
-          <Card className="border-0 shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Completed
-                  </p>
-                  <p className="text-2xl font-bold text-teal-600">
-                    {completedGoals.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Goals achieved
-                  </p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-teal-500" />
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs text-gray-500 font-medium mb-1">
+                  Completed
+                </p>
+                <p className="text-xl font-bold text-gray-900 mb-1">
+                  {completedGoals.length}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Goals achieved
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-gray-100 rounded-full p-2">
+                <CheckCircle className="w-4 h-4 text-gray-600" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Add Goal Button */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Button
             onClick={() => setIsAddingGoal(true)}
-            className="bg-teal-500 hover:bg-teal-600 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md transition-all duration-200"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add New Goal
@@ -252,7 +252,7 @@ export default function Goals() {
 
         {/* Goals Grid */}
         <div className="overflow-x-auto md:overflow-x-visible">
-          <div className="flex gap-6 md:grid md:grid-cols-3 md:gap-6 min-w-max md:min-w-0">
+          <div className="flex gap-4 md:grid md:grid-cols-3 md:gap-4 min-w-max md:min-w-0">
             {userData.goals.length > 0 ? (
               userData.goals.map((goal) => {
                 const percentage = Math.min(
@@ -412,77 +412,79 @@ export default function Goals() {
         </div>
 
         {/* Goal Tips */}
-        <Card className="border-0 shadow-md mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-foreground">
-              <Star className="w-5 h-5 text-teal-500" />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-8 hover:shadow-md transition-all duration-200">
+          <div className="bg-gray-50 rounded-t-xl p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+              <div className="bg-teal-100 rounded-full p-2">
+                <Star className="w-5 h-5 text-teal-600" />
+              </div>
               Goal Setting Tips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-teal-600 text-sm font-bold">1</span>
+            </h3>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                  <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">1</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground text-sm">
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
                       Be Specific
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Set clear, specific goals with exact amounts and deadlines
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-teal-600 text-sm font-bold">2</span>
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                  <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">2</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground text-sm">
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
                       Start Small
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Begin with achievable goals to build momentum
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-teal-600 text-sm font-bold">3</span>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                  <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">3</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground text-sm">
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
                       Track Progress
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Regularly update your progress to stay motivated
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-teal-600 text-sm font-bold">4</span>
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-all duration-200">
+                  <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">4</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground text-sm">
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">
                       Celebrate Wins
                     </h4>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-600 leading-relaxed">
                       Acknowledge milestones and completed goals
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Modals */}
         <GoalForm

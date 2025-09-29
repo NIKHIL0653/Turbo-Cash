@@ -38,7 +38,7 @@ export default function Dashboard() {
     useState("expense");
   const [viewMode, setViewMode] = useState<"goals" | "budgets">("goals");
 
-  // Refs for height synchronization
+  // Simplified refs - no longer needed for complex height sync
   const spendingBreakdownRef = useRef<HTMLDivElement>(null);
   const goalsProgressRef = useRef<HTMLDivElement>(null);
 
@@ -273,62 +273,69 @@ export default function Dashboard() {
     };
   }, [userData.transactions, userData.goals, selectedPeriod]);
 
-  // Height synchronization effect
+  // Simplified height synchronization effect
   useEffect(() => {
     let resizeObserver: ResizeObserver | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const syncHeights = () => {
-      if (
-        window.innerWidth >= 1024 &&
-        spendingBreakdownRef.current &&
-        goalsProgressRef.current
-      ) {
-        // Force a reflow to get accurate heights
-        requestAnimationFrame(() => {
-          if (spendingBreakdownRef.current && goalsProgressRef.current) {
-            const spendingHeight =
-              spendingBreakdownRef.current.getBoundingClientRect().height;
-            const goalsContainer = goalsProgressRef.current.querySelector(
-              ".goals-progress-container",
+      // Clear any existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Debounce the height sync to prevent infinite loops
+      timeoutId = setTimeout(() => {
+        if (
+          window.innerWidth >= 1024 &&
+          spendingBreakdownRef.current &&
+          goalsProgressRef.current
+        ) {
+          const spendingHeight = spendingBreakdownRef.current.offsetHeight;
+          const goalsContainer = goalsProgressRef.current.querySelector(
+            ".goals-progress-container",
+          ) as HTMLElement;
+
+          if (goalsContainer && spendingHeight > 0) {
+            // Calculate available height for goals content
+            const goalsHeader = goalsProgressRef.current.querySelector(
+              ".goals-header-height",
             ) as HTMLElement;
+            const headerHeight = goalsHeader ? goalsHeader.offsetHeight : 0;
+            const cardPadding = 48; // CardContent padding
+            const availableHeight = Math.max(
+              spendingHeight - headerHeight - cardPadding,
+              200,
+            );
 
-            if (goalsContainer) {
-              // Calculate available height for goals content
-              const goalsHeader = goalsProgressRef.current.querySelector(
-                ".goals-header-height",
-              ) as HTMLElement;
-              const headerHeight = goalsHeader
-                ? goalsHeader.getBoundingClientRect().height
-                : 0;
-              const cardPadding = 48; // CardContent padding
-              const availableHeight = Math.max(
-                spendingHeight - headerHeight - cardPadding,
-                200,
-              );
-
+            // Only update if the height has actually changed
+            const currentMaxHeight = parseInt(goalsContainer.style.maxHeight || "0");
+            if (Math.abs(currentMaxHeight - availableHeight) > 5) {
               goalsContainer.style.maxHeight = `${availableHeight}px`;
-              goalsContainer.style.height = `${availableHeight}px`;
+              goalsContainer.style.overflowY = "auto";
             }
           }
-        });
-      } else if (goalsProgressRef.current) {
-        // Reset for mobile
-        const goalsContainer = goalsProgressRef.current.querySelector(
-          ".goals-progress-container",
-        ) as HTMLElement;
-        if (goalsContainer) {
-          goalsContainer.style.maxHeight = "400px";
-          goalsContainer.style.height = "auto";
+        } else if (goalsProgressRef.current) {
+          // Reset for mobile
+          const goalsContainer = goalsProgressRef.current.querySelector(
+            ".goals-progress-container",
+          ) as HTMLElement;
+          if (goalsContainer) {
+            goalsContainer.style.maxHeight = "";
+            goalsContainer.style.overflowY = "auto";
+          }
         }
-      }
+      }, 100);
     };
 
     // Initial sync
-    setTimeout(syncHeights, 100);
+    syncHeights();
 
     // Set up ResizeObserver for automatic height updates
     if (spendingBreakdownRef.current) {
-      resizeObserver = new ResizeObserver(syncHeights);
+      resizeObserver = new ResizeObserver(() => {
+        syncHeights();
+      });
       resizeObserver.observe(spendingBreakdownRef.current);
     }
 
@@ -339,9 +346,12 @@ export default function Dashboard() {
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       window.removeEventListener("resize", syncHeights);
     };
-  }, [dashboardData.categories.length, dashboardData.goals.length]);
+  }, []);
 
   // Helper function to get category colors
   function getCategoryColor(category: string) {
@@ -360,15 +370,15 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header */}
         <div className="mb-6 flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Dashboard
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               {hasData
                 ? "Your financial overview"
                 : "Start by adding your first transaction or goal"}
@@ -376,7 +386,7 @@ export default function Dashboard() {
           </div>
           <Button
             onClick={() => navigate("/learn")}
-            className="learn-btn !bg-blue-500 hover:!bg-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
             size="default"
           >
             <BookOpen className="w-4 h-4 mr-2" />
@@ -424,165 +434,165 @@ export default function Dashboard() {
           <>
             {/* Quick Actions */}
             <div className="mb-6">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      onClick={() => setShowTransactionForm(true)}
-                      className="bg-teal-600 hover:bg-teal-700 text-white h-9"
-                      size="sm"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Add Transaction
-                    </Button>
-                    <Button
-                      onClick={() => setShowGoalForm(true)}
-                      variant="outline"
-                      className="border-teal-500 text-teal-600 hover:bg-teal-50 dark:border-teal-400 dark:text-teal-400 dark:hover:bg-teal-900/20 h-9"
-                      size="sm"
-                    >
-                      Set New Goal
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    onClick={() => setShowTransactionForm(true)}
+                    className="bg-gray-800 hover:bg-gray-900 text-white shadow-sm hover:shadow-md transition-all duration-200 flex-1"
+                    size="default"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Add Transaction
+                  </Button>
+                  <Button
+                    onClick={() => setShowGoalForm(true)}
+                    variant="outline"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow-md transition-all duration-200 flex-1"
+                    size="default"
+                  >
+                    <Target className="w-4 h-4 mr-2" />
+                    Set New Goal
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Key Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-              <Card className="border-0 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Total Expenses
-                      </p>
-                      <p className="text-xl font-bold text-foreground">
-                        {formatAmount(dashboardData.totalExpenses)}
-                      </p>
-                      {dashboardData.totalExpenses > 0 ? (
-                        <p
-                          className={`text-sm flex items-center gap-1 ${
-                            dashboardData.percentageChange < 0
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {dashboardData.percentageChange < 0 ? (
-                            <TrendingDown className="w-4 h-4" />
-                          ) : (
-                            <TrendingUp className="w-4 h-4" />
-                          )}
-                          {Math.abs(dashboardData.percentageChange).toFixed(1)}%
-                          vs last month
-                        </p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">
-                          This month
-                        </p>
-                      )}
-                    </div>
-                    <DollarSign className="w-8 h-8 text-red-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Money Saved
-                      </p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-medium mb-1">
+                      Total Expenses
+                    </p>
+                    <p className="text-xl font-bold text-gray-900 mb-1">
+                      {formatAmount(dashboardData.totalExpenses)}
+                    </p>
+                    {dashboardData.totalExpenses > 0 ? (
                       <p
-                        className={`text-xl font-bold ${dashboardData.savings >= 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`text-xs flex items-center gap-1 font-medium ${
+                          dashboardData.percentageChange < 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
-                        {dashboardData.savings >= 0 ? "+" : ""}
-                        {formatAmount(Math.abs(dashboardData.savings))}
+                        {dashboardData.percentageChange < 0 ? (
+                          <TrendingDown className="w-3 h-3" />
+                        ) : (
+                          <TrendingUp className="w-3 h-3" />
+                        )}
+                        {Math.abs(dashboardData.percentageChange).toFixed(1)}%
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                    ) : (
+                      <p className="text-xs text-gray-500">
                         This month
                       </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-green-500" />
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-gray-100 rounded-full p-2">
+                    <DollarSign className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+              </div>
 
-              <Card className="border-0 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Top Category
-                      </p>
-                      <p className="text-xl font-bold text-foreground">
-                        {dashboardData.topCategory}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatAmount(dashboardData.topCategoryAmount)}
-                      </p>
-                    </div>
-                    <PieChart className="w-8 h-8 text-blue-500" />
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-medium mb-1">
+                      Money Saved
+                    </p>
+                    <p
+                      className={`text-xl font-bold mb-1 ${dashboardData.savings >= 0 ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {dashboardData.savings >= 0 ? "+" : ""}
+                      {formatAmount(Math.abs(dashboardData.savings))}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      This month
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-gray-100 rounded-full p-2">
+                    <TrendingUp className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+              </div>
 
-              <Card className="border-0 shadow-md">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        Active Goals
-                      </p>
-                      <p className="text-xl font-bold text-foreground">
-                        {userData.goals.length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        In progress
-                      </p>
-                    </div>
-                    <Target className="w-8 h-8 text-purple-500" />
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-medium mb-1">
+                      Top Category
+                    </p>
+                    <p className="text-xl font-bold text-gray-900 mb-1">
+                      {dashboardData.topCategory}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {formatAmount(dashboardData.topCategoryAmount)}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="bg-gray-100 rounded-full p-2">
+                    <PieChart className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 font-medium mb-1">
+                      Active Goals
+                    </p>
+                    <p className="text-xl font-bold text-gray-900 mb-1">
+                      {userData.goals.length}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      In progress
+                    </p>
+                  </div>
+                  <div className="bg-gray-100 rounded-full p-2">
+                    <Target className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="dashboard-section-grid grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 min-h-0">
               {/* Spending Breakdown */}
-              <Card
+              <div
                 ref={spendingBreakdownRef}
-                className="border-0 shadow-md dashboard-section-card"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 min-h-0"
               >
-                <CardHeader className="flex-shrink-0">
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <PieChart className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <div className="bg-gray-50 rounded-t-lg p-3 border-b border-gray-200">
+                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <div className="bg-gray-100 rounded-full p-1">
+                      <PieChart className="w-4 h-4 text-gray-600" />
+                    </div>
                     Spending Breakdown
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="dashboard-section-content p-6">
-                  <div className="space-y-3">
+                  </h3>
+                </div>
+                <div className="p-3">
+                  <div className="space-y-4">
                     {dashboardData.categories.length > 0 ? (
-                      <div className="max-h-48 overflow-y-auto scrollbar-thin pr-2">
+                      <div className="max-h-64 overflow-y-auto scrollbar-thin pr-2">
                         <div className="space-y-3">
                           {dashboardData.categories.map((category, index) => (
                             <div
                               key={index}
-                              className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all duration-200"
                             >
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-4">
                                 <div
-                                  className={`w-4 h-4 rounded-full ${category.color} shadow-sm`}
+                                  className={`w-5 h-5 rounded-full ${category.color} shadow-sm`}
                                 ></div>
-                                <span className="text-sm text-foreground font-medium">
+                                <span className="text-gray-900 font-medium">
                                   {category.name}
                                 </span>
                               </div>
                               <div className="text-right">
-                                <p className="text-sm font-semibold text-foreground">
+                                <p className="text-lg font-semibold text-gray-900">
                                   {formatAmount(category.amount)}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-sm text-gray-600">
                                   {category.percentage.toFixed(1)}%
                                 </p>
                               </div>
@@ -591,21 +601,24 @@ export default function Dashboard() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        No expenses this month yet
+                      <div className="text-center py-12 text-gray-500">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <PieChart className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-lg">No expenses this month yet</p>
                       </div>
                     )}
                   </div>
                   {dashboardData.categories.length > 0 && (
                     <div className="mt-6">
-                      <p className="text-xs text-muted-foreground mb-2">
+                      <p className="text-sm text-gray-600 font-medium mb-4">
                         Spending Distribution
                       </p>
-                      <div className="w-full h-6 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden shadow-inner flex">
+                      <div className="w-full h-8 bg-gray-200 rounded-lg overflow-hidden shadow-inner flex">
                         {dashboardData.categories.map((category, index) => (
                           <div
                             key={index}
-                            className={`${category.color} transition-all duration-300 hover:opacity-80`}
+                            className={`${category.color} transition-all duration-300 hover:opacity-80 shadow-sm`}
                             style={{ width: `${category.percentage}%` }}
                             title={`${category.name}: ${category.percentage.toFixed(1)}%`}
                           ></div>
@@ -613,48 +626,50 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Goals & Budgets Progress */}
-              <Card
+              <div
                 ref={goalsProgressRef}
-                className="border-0 shadow-md dashboard-section-card"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 min-h-0"
               >
-                <CardHeader className="flex-shrink-0 goals-header-height">
+                <div className="bg-gray-50 rounded-t-lg p-3 border-b border-gray-200">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-foreground flex items-center gap-2">
-                      <Target className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                      <div className="bg-gray-100 rounded-full p-1">
+                        <Target className="w-4 h-4 text-gray-600" />
+                      </div>
                       {viewMode === "goals"
                         ? `Goals Progress (${dashboardData.goals.length})`
                         : `Budgets (${userData.budgets.length})`}
-                    </CardTitle>
-                    <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    </h3>
+                    <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
                       <button
                         onClick={() => setViewMode("goals")}
-                        className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                           viewMode === "goals"
-                            ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
                         }`}
                       >
                         Goals
                       </button>
                       <button
                         onClick={() => setViewMode("budgets")}
-                        className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                           viewMode === "budgets"
-                            ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
                         }`}
                       >
                         Budgets
                       </button>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="dashboard-section-content">
-                  <div className="goals-progress-container space-y-4 pr-2 scrollbar-thin">
+                </div>
+                <div className="p-6">
+                  <div className="goals-progress-container space-y-4 pr-2 scrollbar-thin max-h-96 overflow-y-auto">
                     {viewMode === "goals" ? (
                       dashboardData.goals.length > 0 ? (
                         dashboardData.goals.map((goal, index) => {
@@ -665,32 +680,35 @@ export default function Dashboard() {
                           return (
                             <div
                               key={index}
-                              className="bg-muted/50 p-4 rounded-lg"
+                              className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-all duration-200"
                             >
-                              <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-medium text-foreground text-sm truncate">
+                              <div className="flex justify-between items-center mb-3">
+                                <h3 className="font-semibold text-gray-900 text-base truncate">
                                   {goal.name}
                                 </h3>
-                                <span className="text-xs text-muted-foreground ml-2">
+                                <span className="text-sm text-purple-600 font-medium ml-2">
                                   {percentage.toFixed(1)}%
                                 </span>
                               </div>
-                              <div className="w-full bg-muted rounded-full h-2 mb-2">
+                              <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
                                 <div
-                                  className="bg-teal-500 h-2 rounded-full transition-all duration-300"
+                                  className="bg-purple-500 h-3 rounded-full transition-all duration-500 shadow-sm"
                                   style={{ width: `${percentage}%` }}
                                 ></div>
                               </div>
-                              <div className="flex justify-between text-xs text-muted-foreground">
-                                <span>{formatAmount(goal.currentAmount)}</span>
-                                <span>{formatAmount(goal.targetAmount)}</span>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">{formatAmount(goal.currentAmount)}</span>
+                                <span className="text-gray-900 font-medium">{formatAmount(goal.targetAmount)}</span>
                               </div>
                             </div>
                           );
                         })
                       ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          No goals set yet
+                        <div className="text-center py-12 text-gray-500">
+                          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Target className="w-8 h-8 text-purple-400" />
+                          </div>
+                          <p className="text-lg">No goals set yet</p>
                         </div>
                       )
                     ) : userData.budgets.length > 0 ? (
@@ -751,17 +769,21 @@ export default function Dashboard() {
                         return (
                           <div
                             key={index}
-                            className="bg-muted/50 p-4 rounded-lg"
+                            className={`p-4 rounded-lg border hover:bg-gray-50 transition-all duration-200 ${
+                              isOverBudget
+                                ? "bg-red-50 border-red-200"
+                                : "bg-green-50 border-green-200"
+                            }`}
                           >
-                            <div className="flex justify-between items-center mb-2">
-                              <h3 className="font-medium text-foreground text-sm truncate">
+                            <div className="flex justify-between items-center mb-3">
+                              <h3 className="font-semibold text-gray-900 text-base truncate">
                                 {budget.category}
                               </h3>
                               <span
-                                className={`text-xs ml-2 ${
+                                className={`text-sm font-medium ml-2 ${
                                   isOverBudget
                                     ? "text-red-600"
-                                    : "text-muted-foreground"
+                                    : "text-green-600"
                                 }`}
                               >
                                 {budgetAmount > 0
@@ -770,54 +792,61 @@ export default function Dashboard() {
                                 %
                               </span>
                             </div>
-                            <div className="w-full bg-muted rounded-full h-2 mb-2">
+                            <div className="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
                               <div
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  isOverBudget ? "bg-red-500" : "bg-green-500"
+                                className={`h-3 rounded-full transition-all duration-500 shadow-sm ${
+                                  isOverBudget
+                                    ? "bg-red-500"
+                                    : "bg-green-500"
                                 }`}
                                 style={{
                                   width: `${Math.min(percentage, 100)}%`,
                                 }}
                               ></div>
                             </div>
-                            <div className="flex justify-between text-xs text-muted-foreground">
-                              <span>{formatAmount(currentSpent)}</span>
-                              <span>{formatAmount(budgetAmount)}</span>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">{formatAmount(currentSpent)}</span>
+                              <span className="text-gray-900 font-medium">{formatAmount(budgetAmount)}</span>
                             </div>
                           </div>
                         );
                       })
                     ) : (
-                      <div className="text-center py-4 text-muted-foreground">
-                        No budgets set yet
+                      <div className="text-center py-12 text-gray-500">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <DollarSign className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-lg">No budgets set yet</p>
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Analytics Section - Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 min-h-0">
               {/* Spending Insights - Same size as Spending Breakdown */}
-              <Card className="border-0 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 min-h-0">
+                <div className="bg-gray-50 rounded-t-lg p-3 border-b border-gray-200">
+                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <div className="bg-gray-100 rounded-full p-1">
+                      <BarChart3 className="w-4 h-4 text-gray-600" />
+                    </div>
                     Spending Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3">
+                  </h3>
+                </div>
+                <div className="p-3">
                   {/* Period Selector */}
-                  <div className="flex gap-1 mb-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-fit">
+                  <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
                     {["Week", "Month", "Quarter", "Year"].map((period) => (
                       <button
                         key={period}
                         onClick={() => setSelectedPeriod(period)}
-                        className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                           selectedPeriod === period
-                            ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-600 hover:text-gray-900"
                         }`}
                       >
                         {period}
@@ -826,8 +855,8 @@ export default function Dashboard() {
                   </div>
 
                   {/* Monthly Cards - Horizontally Scrollable */}
-                  <div className="overflow-x-auto pb-2 scrollbar-thin">
-                    <div className="flex gap-2 min-w-max">
+                  <div className="overflow-x-auto pb-4 scrollbar-thin">
+                    <div className="flex gap-3 min-w-max">
                       {dashboardData.monthlyTrends.map((trend, index) => {
                         const maxValue = Math.max(
                           ...dashboardData.monthlyTrends.map((t) =>
@@ -842,32 +871,32 @@ export default function Dashboard() {
                         return (
                           <div
                             key={index}
-                            className={`flex-shrink-0 w-16 p-2 rounded-lg border transition-all ${
+                            className={`flex-shrink-0 w-20 p-4 rounded-lg border transition-all duration-200 hover:shadow-sm ${
                               trend.isCurrentMonth
-                                ? "border-teal-400 bg-teal-50 dark:bg-teal-900/20"
-                                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                ? "border-orange-400 bg-orange-50"
+                                : "border-gray-200 bg-white hover:bg-gray-50"
                             }`}
                           >
                             {/* Month Label */}
-                            <div className="text-center mb-2">
-                              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                            <div className="text-center mb-3">
+                              <p className="text-sm font-medium text-gray-600">
                                 {trend.month}
                               </p>
                             </div>
 
                             {/* Chart Bars */}
-                            <div className="flex items-end justify-center gap-1 h-12 mb-1">
+                            <div className="flex items-end justify-center gap-2 h-16 mb-2">
                               <div
-                                className="w-1.5 bg-green-500 dark:bg-green-400 rounded-t-sm transition-all duration-300"
+                                className="w-2 bg-green-500 rounded-t-sm transition-all duration-300 hover:opacity-80"
                                 style={{
-                                  height: `${Math.max(incomeHeight, 2)}%`,
+                                  height: `${Math.max(incomeHeight, 4)}%`,
                                 }}
                                 title={`Income: ${formatAmount(trend.income)}`}
                               />
                               <div
-                                className="w-1.5 bg-red-500 dark:bg-red-400 rounded-t-sm transition-all duration-300"
+                                className="w-2 bg-red-500 rounded-t-sm transition-all duration-300 hover:opacity-80"
                                 style={{
-                                  height: `${Math.max(expenseHeight, 2)}%`,
+                                  height: `${Math.max(expenseHeight, 4)}%`,
                                 }}
                                 title={`Spending: ${formatAmount(trend.expense)}`}
                               />
@@ -879,15 +908,15 @@ export default function Dashboard() {
                   </div>
 
                   {/* Summary Cards - Compact */}
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800">
-                      <div className="flex items-center gap-1 mb-1">
-                        <DollarSign className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="bg-green-50 p-4 rounded-lg border border-green-200 hover:bg-green-100 transition-all duration-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-700">
                           Earnings
                         </span>
                       </div>
-                      <p className="text-sm font-bold text-green-800 dark:text-green-200">
+                      <p className="text-lg font-bold text-green-800">
                         {formatAmount(
                           dashboardData.monthlyTrends.find(
                             (t) => t.isCurrentMonth,
@@ -896,14 +925,14 @@ export default function Dashboard() {
                       </p>
                     </div>
 
-                    <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800">
-                      <div className="flex items-center gap-1 mb-1">
-                        <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" />
-                        <span className="text-xs font-medium text-red-700 dark:text-red-300">
+                    <div className="bg-red-50 p-4 rounded-lg border border-red-200 hover:bg-red-100 transition-all duration-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingDown className="w-4 h-4 text-red-600" />
+                        <span className="text-sm font-medium text-red-700">
                           Total Spend
                         </span>
                       </div>
-                      <p className="text-sm font-bold text-red-800 dark:text-red-200">
+                      <p className="text-lg font-bold text-red-800">
                         {formatAmount(
                           dashboardData.monthlyTrends.find(
                             (t) => t.isCurrentMonth,
@@ -912,33 +941,35 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Key Insights - Same size as Goals Progress */}
-              <Card className="border-0 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-foreground flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 min-h-0">
+                <div className="bg-gray-50 rounded-t-lg p-3 border-b border-gray-200">
+                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <div className="bg-gray-100 rounded-full p-1">
+                      <AlertTriangle className="w-4 h-4 text-gray-600" />
+                    </div>
                     Key Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
+                  </h3>
+                </div>
+                <div className="p-3">
                   <div className="space-y-4">
                     {dashboardData.insights.map((insight, index) => (
                       <div
                         key={index}
-                        className="relative flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-200 dark:border-blue-800 rounded-lg hover:shadow-md transition-all duration-200"
+                        className="relative flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:shadow-sm transition-all duration-200"
                       >
-                        <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                        <div className="flex-shrink-0 w-3 h-3 bg-blue-500 rounded-full mt-2"></div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed font-medium">
+                          <p className="text-sm text-blue-800 leading-relaxed font-medium">
                             {insight}
                           </p>
                         </div>
                         <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-blue-500/10 dark:bg-blue-400/10 rounded-full flex items-center justify-center">
-                            <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">
+                            <AlertTriangle className="w-5 h-5 text-blue-600" />
                           </div>
                         </div>
                       </div>
@@ -946,11 +977,11 @@ export default function Dashboard() {
 
                     {/* Add some visual padding if there are fewer insights */}
                     {dashboardData.insights.length < 3 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <AlertTriangle className="w-8 h-8 text-blue-500 dark:text-blue-400" />
+                      <div className="text-center py-12 text-gray-500">
+                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <AlertTriangle className="w-8 h-8 text-blue-500" />
                         </div>
-                        <p className="text-sm">
+                        <p className="text-lg">
                           {dashboardData.insights.length === 0
                             ? "Add some transactions to see personalized insights"
                             : "Keep tracking your finances to unlock more insights"}
@@ -958,8 +989,8 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </>
         )}

@@ -61,10 +61,14 @@ export default function Budget() {
   const budgets = userData.budgets;
 
   const [isAddingBudget, setIsAddingBudget] = useState(false);
-  const [newBudget, setNewBudget] = useState({
+  const [newBudget, setNewBudget] = useState<{
+    category: string;
+    allocated: string;
+    period: "weekly" | "monthly" | "yearly";
+  }>({
     category: "",
     allocated: "",
-    period: "monthly" as const,
+    period: "monthly",
   });
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
@@ -116,6 +120,7 @@ export default function Budget() {
         category: newBudget.category,
         allocated: parseFloat(newBudget.allocated),
         period: newBudget.period,
+        startDate: new Date().toISOString(),
       });
       setNewBudget({ category: "", allocated: "", period: "monthly" });
       setIsAddingBudget(false);
@@ -173,14 +178,14 @@ export default function Budget() {
   const hasBudgets = budgets.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Budget Management
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600">
             {hasBudgets
               ? "Track your spending against budgets and get alerts before overspending."
               : "Create budgets for different categories to track your spending."}
@@ -219,89 +224,90 @@ export default function Budget() {
 
         {/* Summary Cards - Only show when user has budgets */}
         {hasBudgets && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Total Budget
-                    </p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {formatAmount(totalAllocated)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">This month</p>
-                  </div>
-                  <Target className="w-8 h-8 text-teal-500" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-gray-500 font-medium mb-1">
+                    Total Budget
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 mb-1">
+                    {formatAmount(totalAllocated)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    This month
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Total Spent
-                    </p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {formatAmount(totalSpent)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {((totalSpent / totalAllocated) * 100).toFixed(1)}% of
-                      budget
-                    </p>
-                  </div>
-                  <DollarSign className="w-8 h-8 text-red-500" />
+                <div className="bg-gray-100 rounded-full p-2">
+                  <Target className="w-4 h-4 text-gray-600" />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      Remaining
-                    </p>
-                    <p
-                      className={`text-2xl font-bold ${
-                        remainingBudget >= 0 ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {formatAmount(Math.abs(remainingBudget))}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {remainingBudget >= 0 ? "Available" : "Over budget"}
-                    </p>
-                  </div>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-gray-500 font-medium mb-1">
+                    Total Spent
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 mb-1">
+                    {formatAmount(totalSpent)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {((totalSpent / totalAllocated) * 100).toFixed(1)}% of budget
+                  </p>
+                </div>
+                <div className="bg-gray-100 rounded-full p-2">
+                  <DollarSign className="w-4 h-4 text-gray-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-gray-500 font-medium mb-1">
+                    Remaining
+                  </p>
+                  <p
+                    className={`text-xl font-bold mb-1 ${
+                      remainingBudget >= 0 ? "text-gray-900" : "text-gray-900"
+                    }`}
+                  >
+                    {formatAmount(Math.abs(remainingBudget))}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {remainingBudget >= 0 ? "Available" : "Over budget"}
+                  </p>
+                </div>
+                <div className={`rounded-full p-2 ${remainingBudget >= 0 ? "bg-gray-100" : "bg-gray-100"}`}>
                   {remainingBudget >= 0 ? (
-                    <TrendingUp className="w-8 h-8 text-green-500" />
+                    <TrendingUp className="w-4 h-4 text-gray-600" />
                   ) : (
-                    <TrendingDown className="w-8 h-8 text-red-500" />
+                    <TrendingDown className="w-4 h-4 text-gray-600" />
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="border-0 shadow-md">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      High Risk
-                    </p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {highRiskBudgets.length}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Budgets at risk
-                    </p>
-                  </div>
-                  <AlertTriangle className="w-8 h-8 text-orange-500" />
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-xs text-gray-500 font-medium mb-1">
+                    High Risk
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 mb-1">
+                    {highRiskBudgets.length}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Budgets at risk
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="bg-gray-100 rounded-full p-2">
+                  <AlertTriangle className="w-4 h-4 text-gray-600" />
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -389,10 +395,10 @@ export default function Budget() {
         )}
 
         {/* Add Budget Button */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Dialog open={isAddingBudget} onOpenChange={setIsAddingBudget}>
             <DialogTrigger asChild>
-              <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+              <Button className="bg-teal-500 hover:bg-teal-600 text-white shadow-sm hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5">
                 <Plus className="w-4 h-4 mr-2" />
                 Add New Budget
               </Button>
@@ -475,7 +481,7 @@ export default function Budget() {
 
         {/* Budget Categories Grid - Only show when user has budgets */}
         {hasBudgets && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {budgets.map((budget) => {
               const percentage = Math.min(
                 (budget.spent / budget.allocated) * 100,
@@ -738,45 +744,47 @@ export default function Budget() {
         </Dialog>
 
         {/* Budget Tips */}
-        <Card className="border-0 shadow-md mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-teal-500" />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-8 hover:shadow-md transition-all duration-200">
+          <div className="bg-gray-50 rounded-t-xl p-6 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-3">
+              <div className="bg-teal-100 rounded-full p-2">
+                <Calendar className="w-5 h-5 text-teal-600" />
+              </div>
               Budget Tips
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="p-4 bg-teal-50 rounded-lg">
-                <h3 className="font-semibold text-teal-800 mb-2">
+              <div className="p-6 bg-teal-50 rounded-lg border border-teal-200 hover:bg-teal-100 transition-all duration-200">
+                <h3 className="font-semibold text-teal-800 mb-3 text-lg">
                   50/30/20 Rule
                 </h3>
-                <p className="text-sm text-teal-700">
+                <p className="text-sm text-teal-700 leading-relaxed">
                   Allocate 50% for needs, 30% for wants, and 20% for savings and
                   debt repayment.
                 </p>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-800 mb-2">
+              <div className="p-6 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition-all duration-200">
+                <h3 className="font-semibold text-blue-800 mb-3 text-lg">
                   Track Daily
                 </h3>
-                <p className="text-sm text-blue-700">
+                <p className="text-sm text-blue-700 leading-relaxed">
                   Check your budgets daily to stay aware of your spending
                   patterns and avoid surprises.
                 </p>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-2">
+              <div className="p-6 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition-all duration-200">
+                <h3 className="font-semibold text-green-800 mb-3 text-lg">
                   Buffer Zone
                 </h3>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-green-700 leading-relaxed">
                   Set budgets slightly lower than you can afford to create a
                   natural buffer for unexpected expenses.
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

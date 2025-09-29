@@ -160,19 +160,19 @@ interface Subscription {
 }
 
 const OTT_PLATFORMS = [
-  { value: "netflix", label: "Netflix", icon: Tv },
-  { value: "prime", label: "Amazon Prime", icon: Film },
-  { value: "disney", label: "Disney+", icon: Film },
-  { value: "spotify", label: "Spotify", icon: Music },
-  { value: "youtube", label: "YouTube Premium", icon: Tv },
-  { value: "hulu", label: "Hulu", icon: Tv },
-  { value: "hbo", label: "HBO Max", icon: Film },
-  { value: "apple", label: "Apple TV+", icon: Film },
-  { value: "paramount", label: "Paramount+", icon: Film },
-  { value: "peacock", label: "Peacock", icon: Tv },
-  { value: "xbox", label: "Xbox Game Pass", icon: Gamepad2 },
-  { value: "playstation", label: "PlayStation Plus", icon: Gamepad2 },
-  { value: "other", label: "Other", icon: DollarSign },
+  { value: "netflix", label: "Netflix", icon: Tv, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/netflix/netflix-original.svg" },
+  { value: "prime", label: "Amazon Prime", icon: Film, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg" },
+  { value: "disney", label: "Disney+", icon: Film, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/disney/disney-original.svg" },
+  { value: "spotify", label: "Spotify", icon: Music, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spotify/spotify-original.svg" },
+  { value: "youtube", label: "YouTube Premium", icon: Tv, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/youtube/youtube-original.svg" },
+  { value: "hulu", label: "Hulu", icon: Tv, logo: "https://img.icons8.com/color/48/hulu.png" },
+  { value: "hbo", label: "HBO Max", icon: Film, logo: "https://img.icons8.com/color/48/hbo-max.png" },
+  { value: "apple", label: "Apple TV+", icon: Film, logo: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" },
+  { value: "paramount", label: "Paramount+", icon: Film, logo: "https://img.icons8.com/color/48/paramount-plus.png" },
+  { value: "peacock", label: "Peacock", icon: Tv, logo: "https://img.icons8.com/color/48/peacock.png" },
+  { value: "xbox", label: "Xbox Game Pass", icon: Gamepad2, logo: "https://img.icons8.com/color/48/xbox.png" },
+  { value: "playstation", label: "PlayStation Plus", icon: Gamepad2, logo: "https://img.icons8.com/color/48/playstation.png" },
+  { value: "other", label: "Other", icon: DollarSign, logo: null },
 ];
 
 export default function Recurring() {
@@ -328,6 +328,21 @@ export default function Recurring() {
 
   const getPlatformIcon = (platform: string) => {
     const platformData = OTT_PLATFORMS.find((p) => p.value === platform);
+    if (platformData?.logo) {
+      return (
+        <img
+          src={platformData.logo}
+          alt={platformData.label}
+          className="w-6 h-6 object-contain"
+          onError={(e) => {
+            // Fallback to icon if logo fails to load
+            const IconComponent = platformData.icon || DollarSign;
+            e.currentTarget.style.display = 'none';
+            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+      );
+    }
     const IconComponent = platformData?.icon || DollarSign;
     return <IconComponent className="w-5 h-5" />;
   };
