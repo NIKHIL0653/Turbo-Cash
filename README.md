@@ -31,7 +31,6 @@
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![Local Storage](https://img.shields.io/badge/Local_Storage-FFD700?style=for-the-badge&logo=html5&logoColor=white)
-![Cross-Platform DB](https://img.shields.io/badge/Cross_Platform_DB-00D4AA?style=for-the-badge&logo=database&logoColor=white)
 
 ### Deployment
 ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
