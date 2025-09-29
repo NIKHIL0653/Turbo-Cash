@@ -33,7 +33,6 @@
 
 ### Deployment
 ![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)
-![Fly.io](https://img.shields.io/badge/Fly.io-8A2BE2?style=for-the-badge&logo=fly.io&logoColor=white)
 
 ---
 
